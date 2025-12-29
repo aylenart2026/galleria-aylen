@@ -5,14 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Gestione Galleria</title>
     <link rel="stylesheet" href="style.css">
-
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body>
     <header>
-        <h1>Area Riservata - Carica Opere</h1>
-        <a href="index.html" class="btn-back">Torna al Sito</a>
+        <h1>Area Riservata - Gestione Sito</h1>
+        <nav>
+            <a href="index.html">Torna al Sito</a>
+        </nav>
     </header>
 
     <main class="container">
@@ -22,15 +23,26 @@
             <button id="login-btn">Accedi</button>
         </div>
 
-        <div id="admin-content" class="admin-card" style="display: none;">
-            <h2>Pubblica un nuovo Quadro</h2>
-            <form id="admin-form">
-                <input type="text" id="q-titolo" placeholder="Titolo" required>
-                <textarea id="q-desc" placeholder="Descrizione" required></textarea>
-                <input type="text" id="q-prezzo" placeholder="Prezzo" required>
-                <input type="file" id="q-foto" accept="image/*" required>
-                <button type="submit" id="submit-btn">Pubblica sul sito</button>
-            </form>
+        <div id="admin-content" style="display: none;">
+            
+            <div class="admin-card">
+                <h2>Pubblica un nuovo Quadro</h2>
+                <form id="admin-form">
+                    <input type="text" id="q-titolo" placeholder="Titolo" required>
+                    <textarea id="q-desc" placeholder="Descrizione" required></textarea>
+                    <input type="text" id="q-prezzo" placeholder="Prezzo" required>
+                    <input type="file" id="q-foto" accept="image/*" required>
+                    <button type="submit" id="submit-btn">Pubblica sul sito</button>
+                </form>
+            </div>
+
+            <div class="admin-card" style="margin-top: 30px;">
+                <h2>Gestisci/Elimina Quadri</h2>
+                <div id="admin-list-quadri">
+                    <p>Caricamento lista...</p>
+                </div>
+            </div>
+
         </div>
     </main>
 

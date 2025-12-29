@@ -1,4 +1,3 @@
-// Configurazione Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyAzpudn2GxVeWpD_l6MMy4l9iVbzflE4Os",
   authDomain: "sito-aylen.firebaseapp.com",
@@ -22,7 +21,7 @@ if (loginBtn) {
         if (document.getElementById('admin-password').value === "mamma2025") {
             document.getElementById('login-box').style.display = 'none';
             document.getElementById('admin-content').style.display = 'block';
-            caricaListaAdmin(); // Carica la lista per l'eliminazione
+            caricaListaAdmin(); // Carica la lista quando entri
         } else { alert("Password errata!"); }
     });
 }
@@ -67,7 +66,7 @@ if (adminForm) {
     });
 }
 
-// --- LISTA ADMIN PER ELIMINAZIONE ---
+// --- LISTA ADMIN PER ELIMINAZIONE (NUOVA) ---
 function caricaListaAdmin() {
     const listContainer = document.getElementById('admin-list-quadri');
     if (!listContainer) return;
