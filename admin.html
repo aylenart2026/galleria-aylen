@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Gestione Galleria</title>
     <link rel="stylesheet" href="style.css">
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body>
     <header>
@@ -15,28 +18,22 @@
     <main class="container">
         <div id="login-box" class="admin-card">
             <h2>Accesso Protetto</h2>
-            <input type="password" id="admin-password" placeholder="Inserisci la password">
+            <input type="password" id="admin-password" placeholder="Password">
             <button id="login-btn">Accedi</button>
         </div>
 
         <div id="admin-content" class="admin-card" style="display: none;">
             <h2>Pubblica un nuovo Quadro</h2>
             <form id="admin-form">
-                <input type="text" id="q-titolo" placeholder="Titolo dell'opera" required>
-                <textarea id="q-desc" placeholder="Descrizione (es. Olio su tela, 50x70)" required></textarea>
-                <input type="text" id="q-prezzo" placeholder="Prezzo (es. € 150)" required>
-                
-                <label for="q-foto">Seleziona la foto del quadro:</label>
+                <input type="text" id="q-titolo" placeholder="Titolo" required>
+                <textarea id="q-desc" placeholder="Descrizione" required></textarea>
+                <input type="text" id="q-prezzo" placeholder="Prezzo" required>
                 <input type="file" id="q-foto" accept="image/*" required>
-                
                 <button type="submit" id="submit-btn">Pubblica sul sito</button>
             </form>
         </div>
     </main>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-    <script src="app.js"></script>
+    <script src="app.js" defer></script>
 </body>
 </html>
