@@ -3,37 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin | Gestione Galleria</title>
+    <title>Admin - Gestione Galleria</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="quadri.html">Quadri</a>
-        <a href="admin.html" class="active">Admin</a>
-    </nav>
+    <header>
+        <h1>Area Riservata - Carica Opere</h1>
+        <a href="index.html" class="btn-back">Torna al Sito</a>
+    </header>
 
-    <div class="admin-container">
-        <section id="login-section">
-            <h2>Area Riservata</h2>
-            <input type="password" id="admin-pass" placeholder="Inserisci Password">
-            <button id="btn-login" class="btn">Accedi</button>
-        </section>
+    <main class="container">
+        <div id="login-box" class="admin-card">
+            <h2>Accesso Protetto</h2>
+            <input type="password" id="admin-password" placeholder="Inserisci la password">
+            <button id="login-btn">Accedi</button>
+        </div>
 
-        <section id="upload-section" style="display:none;">
-            <h2>Aggiungi un nuovo Quadro</h2>
-            <div class="form-group">
-                <input type="text" id="titolo" placeholder="Titolo dell'opera">
-                <textarea id="descrizione" placeholder="Descrizione o tecnica (es. Olio su tela)"></textarea>
-                <input type="text" id="prezzo" placeholder="Prezzo (es. 200€ o 'Contattami')">
-                <label for="foto-file">Seleziona Foto:</label>
-                <input type="file" id="foto-file" accept="image/*">
-                <button id="btn-carica" class="btn-save">Pubblica sul sito</button>
-            </div>
-            <p id="stato-caricamento"></p>
-        </section>
-    </div>
+        <div id="admin-content" class="admin-card" style="display: none;">
+            <h2>Pubblica un nuovo Quadro</h2>
+            <form id="admin-form">
+                <input type="text" id="q-titolo" placeholder="Titolo dell'opera" required>
+                <textarea id="q-desc" placeholder="Descrizione (es. Olio su tela, 50x70)" required></textarea>
+                <input type="text" id="q-prezzo" placeholder="Prezzo (es. € 150)" required>
+                
+                <label for="q-foto">Seleziona la foto del quadro:</label>
+                <input type="file" id="q-foto" accept="image/*" required>
+                
+                <button type="submit" id="submit-btn">Pubblica sul sito</button>
+            </form>
+        </div>
+    </main>
 
-    <script type="module" src="app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <script src="app.js"></script>
 </body>
 </html>

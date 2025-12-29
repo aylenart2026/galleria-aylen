@@ -1,4 +1,4 @@
-// CONFIGURAZIONE FIREBASE
+// Configurazione Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyAzpudn2GxVeWpD_l6MMy4l9iVbzflE4Os",
   authDomain: "sito-aylen.firebaseapp.com",
@@ -9,32 +9,37 @@ const firebaseConfig = {
   measurementId: "G-WEGB2PCMYF"
 };
 
+// Inizializzazione Firebase e Firestore
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore(); // Firestore gestirà i testi
+const db = firebase.firestore();
 
-// CONFIGURAZIONE CLOUDINARY
+// Configurazione Cloudinary
 const CLOUD_NAME = "dryiwjoqm"; 
-const UPLOAD_PRESET = "quadri_preset";
+const UPLOAD_PRESET = "quadri_preset"; // Deve essere "Unsigned" su Cloudinary
 
-// --- GESTIONE PAGINA ADMIN ---
+// --- LOGICA AREA ADMIN ---
 if (document.getElementById('admin-form')) {
     const loginBox = document.getElementById('login-box');
     const adminContent = document.getElementById('admin-content');
     const loginBtn = document.getElementById('login-btn');
     const passwordInput = document.getElementById('admin-password');
 
+    // Funzione di Login
     loginBtn.addEventListener('click', () => {
         if (passwordInput.value === "mamma2025") {
             loginBox.style.display = 'none';
             adminContent.style.display = 'block';
-        } else { alert("Password errata!"); }
+        } else {
+            alert("Password errata!");
+        }
     });
 
+    // Invio del Modulo
     const form = document.getElementById('admin-form');
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const btn = e.target.querySelector('button');
-        btn.innerText = "Caricamento foto...";
+        const btn = document.getElementById('submit-btn');
+        btn.innerText = "Caricamento in corso...";
         btn.disabled = true;
 
         const file = document.getElementById('q-foto').files[0];
@@ -43,7 +48,7 @@ if (document.getElementById('admin-form')) {
         const prezzo = document.getElementById('q-prezzo').value;
 
         try {
-            // 1. Caricamento su Cloudinary
+            // 1. Caricamento Foto su Cloudinary
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', UPLOAD_PRESET);
@@ -53,13 +58,12 @@ if (document.getElementById('admin-form')) {
                 body: formData
             });
             
-            if (!res.ok) throw new Error("Errore Cloudinary: verifica l'upload preset Unsigned.");
+            if (!res.ok) throw new Error("Errore durante l'upload su Cloudinary");
             
             const data = await res.json();
-            const photoURL = data.secure_url; // URL della foto caricata
+            const photoURL = data.secure_url;
 
-            // 2. Salvataggio dati su Firestore
-            // La raccolta "quadri" verrà creata automaticamente ora
+            // 2. Salvataggio Dati su Firestore (crea raccolta "quadri" se non esiste)
             await db.collection("quadri").add({
                 titolo: titolo,
                 descrizione: desc,
@@ -68,11 +72,11 @@ if (document.getElementById('admin-form')) {
                 data: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            alert("✅ Quadro pubblicato con successo!");
+            alert("✅ Opera pubblicata con successo!");
             form.reset();
         } catch (error) {
             console.error(error);
-            alert("Errore nel caricamento. Controlla la console.");
+            alert("Si è verificato un errore durante il caricamento.");
         } finally {
             btn.innerText = "Pubblica sul sito";
             btn.disabled = false;
@@ -80,13 +84,13 @@ if (document.getElementById('admin-form')) {
     });
 }
 
-// --- VISUALIZZAZIONE GALLERIA ---
+// --- VISUALIZZAZIONE GALLERIA (Se presente un contenitore) ---
 if (document.getElementById('galleria-quadri')) {
     const container = document.getElementById('galleria-quadri');
     
-    // Recupero dati in tempo reale
+    // Ascolta i cambiamenti nel database in tempo reale
     db.collection("quadri").orderBy("data", "desc").onSnapshot((snapshot) => {
-        container.innerHTML = ""; 
+        container.innerHTML = "";
         snapshot.forEach((doc) => {
             const q = doc.data();
             container.innerHTML += `
