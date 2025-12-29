@@ -2,7 +2,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyAzpudn2GxVeWpD_l6MMy4l9iVbzflE4Os",
   authDomain: "sito-aylen.firebaseapp.com",
   projectId: "sito-aylen",
-  databaseURL: "https://sito-aylen-default-rtdb.europe-west1.firebasedatabase.app",
+  databaseURL: "https://sito-aylen-default-rtdb.europe-west1.firebasedatabase.app/",
   storageBucket: "sito-aylen.firebasestorage.app",
   messagingSenderId: "730173556812",
   appId: "1:730173556812:web:8066b55a95d670cc788ce9",
@@ -21,7 +21,7 @@ if (loginBtn) {
         if (document.getElementById('admin-password').value === "mamma2025") {
             document.getElementById('login-box').style.display = 'none';
             document.getElementById('admin-content').style.display = 'block';
-            caricaListaAdmin(); // Carica la lista quando entri
+            caricaListaAdmin(); 
         } else { alert("Password errata!"); }
     });
 }
@@ -66,7 +66,7 @@ if (adminForm) {
     });
 }
 
-// --- LISTA ADMIN PER ELIMINAZIONE (NUOVA) ---
+// --- LISTA ADMIN PER ELIMINAZIONE ---
 function caricaListaAdmin() {
     const listContainer = document.getElementById('admin-list-quadri');
     if (!listContainer) return;
@@ -81,7 +81,7 @@ function caricaListaAdmin() {
                 listContainer.innerHTML += `
                     <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eee; padding: 10px 0;">
                         <span>${q.titolo}</span>
-                        <button onclick="eliminaQuadro('${id}')" style="background: #ff4d4d; width: auto; padding: 5px 10px; font-size: 0.8rem;">Elimina</button>
+                        <button onclick="eliminaQuadro('${id}')" style="background: #ff4d4d; width: auto; padding: 5px 10px; font-size: 0.8rem; color: white; border: none; cursor: pointer;">Elimina</button>
                     </div>`;
             });
         } else {
@@ -90,7 +90,6 @@ function caricaListaAdmin() {
     });
 }
 
-// Funzione globale per eliminare
 window.eliminaQuadro = function(id) {
     if (confirm("Sei sicuro di voler eliminare questo quadro?")) {
         db.ref('quadri/' + id).remove()
@@ -109,7 +108,9 @@ if (galleria) {
             Object.values(data).reverse().forEach(q => {
                 galleria.innerHTML += `
                     <div class="card">
-                        <img src="${q.url}" alt="${q.titolo}">
+                        <a href="${q.url}" target="_blank" title="Clicca per vedere la foto intera">
+                            <img src="${q.url}" alt="${q.titolo}">
+                        </a>
                         <div class="card-info">
                             <h3>${q.titolo}</h3>
                             <p>${q.descrizione}</p>
