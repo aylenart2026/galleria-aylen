@@ -5,20 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Galleria - Aylen Art</title>
     <link rel="stylesheet" href="style.css">
-
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body>
-    <header>
-        <h1>Le mie Opere</h1>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="admin.html">Admin</a>
-        </nav>
-    </header>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="quadri.html" class="active">Quadri</a>
+        <a href="admin.html">Admin</a>
+    </nav>
 
     <main class="container">
+        <h1 style="text-align: center;">Le mie Opere</h1>
         <div id="galleria-quadri" class="gallery-grid">
             <p>Caricamento opere in corso...</p>
         </div>
