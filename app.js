@@ -1,79 +1,97 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-
+// 1. La tua configurazione Firebase (Aggiornata)
 const firebaseConfig = {
-    apiKey: "AIzaSyAzpudn2GxVeWpD_l6MMy4l9iVbzflE4Os",
-    authDomain: "sito-aylen.firebaseapp.com",
-    projectId: "sito-aylen",
-    storageBucket: "sito-aylen.firebasestorage.app",
-    messagingSenderId: "730173556812",
-    appId: "1:730173556812:web:8066b55a95d670cc788ce9"
+  apiKey: "AIzaSyAzpudn2GxVeWpD_l6MMy4l9iVbzflE4Os",
+  authDomain: "sito-aylen.firebaseapp.com",
+  projectId: "sito-aylen",
+  storageBucket: "sito-aylen.firebasestorage.app", // Nome corretto per il comando CORS
+  messagingSenderId: "730173556812",
+  appId: "1:730173556812:web:8066b55a95d670cc788ce9",
+  measurementId: "G-WEGB2PCMYF"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const storage = getStorage(app);
+// 2. Inizializzazione Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const storage = firebase.storage();
 
-// --- 1. LOGICA ADMIN (PASSWORD E UPLOAD) ---
-const btnLogin = document.getElementById('btn-login');
-if (btnLogin) {
-    btnLogin.onclick = () => {
-        if (document.getElementById('admin-pass').value === "mamma2025") {
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('upload-section').style.display = 'block';
-        } else { alert("Password errata!"); }
-    };
-}
+// --- FUNZIONI PER LA PAGINA ADMIN ---
+if (document.getElementById('admin-form')) {
+    const loginBox = document.getElementById('login-box');
+    const adminContent = document.getElementById('admin-content');
+    const passwordInput = document.getElementById('admin-password');
+    const loginBtn = document.getElementById('login-btn');
 
-const btnCarica = document.getElementById('btn-carica');
-if (btnCarica) {
-    btnCarica.onclick = async () => {
-        const file = document.getElementById('foto-file').files[0];
-        const titolo = document.getElementById('titolo').value;
-        const desc = document.getElementById('descrizione').value;
-        const prezzo = document.getElementById('prezzo').value;
-        const stato = document.getElementById('stato-caricamento');
+    // Accesso con password
+    loginBtn.addEventListener('click', () => {
+        if (passwordInput.value === "mamma2025") {
+            loginBox.style.display = 'none';
+            adminContent.style.display = 'block';
+        } else {
+            alert("Password errata!");
+        }
+    });
 
-        if (!file || !titolo) return alert("Inserisci titolo e foto!");
+    // Gestione caricamento Quadro
+    const form = document.getElementById('admin-form');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button');
+        btn.innerText = "Caricamento in corso...";
+        btn.disabled = true;
 
-        stato.innerText = "Caricamento in corso...";
+        const file = document.getElementById('q-foto').files[0];
+        const titolo = document.getElementById('q-titolo').value;
+        const desc = document.getElementById('q-desc').value;
+        const prezzo = document.getElementById('q-prezzo').value;
+
         try {
-            const fileRef = ref(storage, `quadri/${Date.now()}_${file.name}`);
-            await uploadBytes(fileRef, file);
-            const url = await getDownloadURL(fileRef);
+            // A. Carica la foto nello Storage
+            const fileName = Date.now() + "_" + file.name;
+            const storageRef = storage.ref('quadri/' + fileName);
+            await storageRef.put(file);
+            const photoURL = await storageRef.getDownloadURL();
 
-            await addDoc(collection(db, "quadri"), {
-                titolo, descrizione: desc, prezzo, immagine: url, data: new Date()
+            // B. Salva i dati nel database (Crea la raccolta "quadri" se non esiste)
+            await db.collection("quadri").add({
+                titolo: titolo,
+                descrizione: desc,
+                prezzo: prezzo,
+                url: photoURL,
+                data: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            stato.innerText = "✅ Pubblicato con successo!";
-            setTimeout(() => location.reload(), 2000);
-        } catch (e) { stato.innerText = "Errore: " + e.message; }
-    };
+            alert("✅ Pubblicato con successo!");
+            form.reset();
+        } catch (error) {
+            console.error("Errore durante il caricamento:", error);
+            alert("Errore durante il caricamento. Controlla la console (F12) per i dettagli CORS.");
+        } finally {
+            btn.innerText = "Pubblica sul sito";
+            btn.disabled = false;
+        }
+    });
 }
 
-// --- 2. LOGICA VETRINA (MOSTRA QUADRI) ---
-const galleryGrid = document.getElementById('gallery-container');
-if (galleryGrid) {
-    const caricaQuadri = async () => {
-        const q = query(collection(db, "quadri"), orderBy("data", "desc"));
-        const querySnapshot = await getDocs(q);
-        galleryGrid.innerHTML = ""; // Pulisce il caricamento
+// --- FUNZIONI PER LA PAGINA QUADRI (VISUALIZZAZIONE) ---
+if (document.getElementById('galleria-quadri')) {
+    const container = document.getElementById('galleria-quadri');
 
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            galleryGrid.innerHTML += `
-                <div class="card">
-                    <img src="${data.immagine}" alt="${data.titolo}">
-                    <div class="card-info">
-                        <h3>${data.titolo}</h3>
-                        <p>${data.descrizione}</p>
-                        <span class="price">${data.prezzo}</span>
+    // Recupera i dati in tempo reale dal database
+    db.collection("quadri").orderBy("data", "desc").onSnapshot((snapshot) => {
+        container.innerHTML = ""; // Pulisce il contenitore
+        snapshot.forEach((doc) => {
+            const q = doc.data();
+            const card = `
+                <div class="quadro-card">
+                    <img src="${q.url}" alt="${q.titolo}">
+                    <div class="quadro-info">
+                        <h3>${q.titolo}</h3>
+                        <p>${q.descrizione}</p>
+                        <span class="prezzo">${q.prezzo}</span>
                     </div>
                 </div>
             `;
+            container.innerHTML += card;
         });
-    };
-    caricaQuadri();
+    });
 }
