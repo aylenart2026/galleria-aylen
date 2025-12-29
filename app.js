@@ -1,45 +1,44 @@
-// Configurazione Firebase
+// Configurazione Firebase aggiornata con Realtime Database
 const firebaseConfig = {
   apiKey: "AIzaSyAzpudn2GxVeWpD_l6MMy4l9iVbzflE4Os",
   authDomain: "sito-aylen.firebaseapp.com",
   projectId: "sito-aylen",
+  databaseURL: "https://sito-aylen-default-rtdb.europe-west1.firebasedatabase.app/",
   storageBucket: "sito-aylen.firebasestorage.app",
   messagingSenderId: "730173556812",
   appId: "1:730173556812:web:8066b55a95d670cc788ce9",
   measurementId: "G-WEGB2PCMYF"
 };
 
-// Inizializzazione Firebase e Firestore
+// Inizializza Firebase e Realtime Database
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const db = firebase.database();
 
 // Configurazione Cloudinary
 const CLOUD_NAME = "dryiwjoqm"; 
-const UPLOAD_PRESET = "quadri_preset"; // Deve essere "Unsigned" su Cloudinary
+const UPLOAD_PRESET = "quadri_preset"; // Assicurati sia "Unsigned" nelle impostazioni Cloudinary
 
-// --- LOGICA AREA ADMIN ---
-if (document.getElementById('admin-form')) {
-    const loginBox = document.getElementById('login-box');
-    const adminContent = document.getElementById('admin-content');
-    const loginBtn = document.getElementById('login-btn');
-    const passwordInput = document.getElementById('admin-password');
-
-    // Funzione di Login
+// --- GESTIONE LOGIN ---
+const loginBtn = document.getElementById('login-btn');
+if (loginBtn) {
     loginBtn.addEventListener('click', () => {
-        if (passwordInput.value === "mamma2025") {
-            loginBox.style.display = 'none';
-            adminContent.style.display = 'block';
+        const passInput = document.getElementById('admin-password');
+        if (passInput.value === "mamma2025") {
+            document.getElementById('login-box').style.display = 'none';
+            document.getElementById('admin-content').style.display = 'block';
         } else {
             alert("Password errata!");
         }
     });
+}
 
-    // Invio del Modulo
-    const form = document.getElementById('admin-form');
-    form.addEventListener('submit', async (e) => {
+// --- CARICAMENTO QUADRI ---
+const adminForm = document.getElementById('admin-form');
+if (adminForm) {
+    adminForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('submit-btn');
-        btn.innerText = "Caricamento in corso...";
+        btn.innerText = "Caricamento...";
         btn.disabled = true;
 
         const file = document.getElementById('q-foto').files[0];
@@ -48,35 +47,32 @@ if (document.getElementById('admin-form')) {
         const prezzo = document.getElementById('q-prezzo').value;
 
         try {
-            // 1. Caricamento Foto su Cloudinary
+            // 1. Caricamento su Cloudinary
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', UPLOAD_PRESET);
 
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
                 method: 'POST',
                 body: formData
             });
-            
-            if (!res.ok) throw new Error("Errore durante l'upload su Cloudinary");
-            
-            const data = await res.json();
+            const data = await response.json();
             const photoURL = data.secure_url;
 
-            // 2. Salvataggio Dati su Firestore (crea raccolta "quadri" se non esiste)
-            await db.collection("quadri").add({
+            // 2. Salvataggio su Realtime Database
+            await db.ref('quadri').push({
                 titolo: titolo,
                 descrizione: desc,
                 prezzo: prezzo,
                 url: photoURL,
-                data: firebase.firestore.FieldValue.serverTimestamp()
+                timestamp: Date.now()
             });
 
-            alert("✅ Opera pubblicata con successo!");
-            form.reset();
+            alert("✅ Opera caricata correttamente!");
+            adminForm.reset();
         } catch (error) {
             console.error(error);
-            alert("Si è verificato un errore durante il caricamento.");
+            alert("Errore nel caricamento. Controlla la connessione.");
         } finally {
             btn.innerText = "Pubblica sul sito";
             btn.disabled = false;
@@ -84,24 +80,26 @@ if (document.getElementById('admin-form')) {
     });
 }
 
-// --- VISUALIZZAZIONE GALLERIA (Se presente un contenitore) ---
-if (document.getElementById('galleria-quadri')) {
-    const container = document.getElementById('galleria-quadri');
-    
-    // Ascolta i cambiamenti nel database in tempo reale
-    db.collection("quadri").orderBy("data", "desc").onSnapshot((snapshot) => {
-        container.innerHTML = "";
-        snapshot.forEach((doc) => {
-            const q = doc.data();
-            container.innerHTML += `
-                <div class="quadro-card">
-                    <img src="${q.url}" alt="${q.titolo}">
-                    <div class="quadro-info">
-                        <h3>${q.titolo}</h3>
-                        <p>${q.descrizione}</p>
-                        <span class="prezzo">${q.prezzo}</span>
-                    </div>
-                </div>`;
-        });
+// --- VISUALIZZAZIONE GALLERIA ---
+const galleria = document.getElementById('galleria-quadri');
+if (galleria) {
+    db.ref('quadri').on('value', (snapshot) => {
+        galleria.innerHTML = "";
+        const data = snapshot.val();
+        if (data) {
+            // Converte l'oggetto in array e lo ordina per data (più recente sopra)
+            const list = Object.values(data).reverse();
+            list.forEach(q => {
+                galleria.innerHTML += `
+                    <div class="quadro-card">
+                        <img src="${q.url}" alt="${q.titolo}">
+                        <div class="quadro-info">
+                            <h3>${q.titolo}</h3>
+                            <p>${q.descrizione}</p>
+                            <span class="prezzo">${q.prezzo}</span>
+                        </div>
+                    </div>`;
+            });
+        }
     });
 }
