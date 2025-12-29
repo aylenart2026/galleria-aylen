@@ -1,42 +1,40 @@
-// 1. La tua configurazione Firebase (Aggiornata)
+// CONFIGURAZIONE FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyAzpudn2GxVeWpD_l6MMy4l9iVbzflE4Os",
   authDomain: "sito-aylen.firebaseapp.com",
   projectId: "sito-aylen",
-  storageBucket: "sito-aylen.firebasestorage.app", // Nome corretto per il comando CORS
+  storageBucket: "sito-aylen.firebasestorage.app",
   messagingSenderId: "730173556812",
   appId: "1:730173556812:web:8066b55a95d670cc788ce9",
   measurementId: "G-WEGB2PCMYF"
 };
 
-// 2. Inizializzazione Firebase
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const storage = firebase.storage();
+const db = firebase.firestore(); // Firestore gestirà i testi
 
-// --- FUNZIONI PER LA PAGINA ADMIN ---
+// CONFIGURAZIONE CLOUDINARY
+const CLOUD_NAME = "dryiwjoqm"; 
+const UPLOAD_PRESET = "quadri_preset";
+
+// --- GESTIONE PAGINA ADMIN ---
 if (document.getElementById('admin-form')) {
     const loginBox = document.getElementById('login-box');
     const adminContent = document.getElementById('admin-content');
-    const passwordInput = document.getElementById('admin-password');
     const loginBtn = document.getElementById('login-btn');
+    const passwordInput = document.getElementById('admin-password');
 
-    // Accesso con password
     loginBtn.addEventListener('click', () => {
         if (passwordInput.value === "mamma2025") {
             loginBox.style.display = 'none';
             adminContent.style.display = 'block';
-        } else {
-            alert("Password errata!");
-        }
+        } else { alert("Password errata!"); }
     });
 
-    // Gestione caricamento Quadro
     const form = document.getElementById('admin-form');
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = e.target.querySelector('button');
-        btn.innerText = "Caricamento in corso...";
+        btn.innerText = "Caricamento foto...";
         btn.disabled = true;
 
         const file = document.getElementById('q-foto').files[0];
@@ -45,13 +43,23 @@ if (document.getElementById('admin-form')) {
         const prezzo = document.getElementById('q-prezzo').value;
 
         try {
-            // A. Carica la foto nello Storage
-            const fileName = Date.now() + "_" + file.name;
-            const storageRef = storage.ref('quadri/' + fileName);
-            await storageRef.put(file);
-            const photoURL = await storageRef.getDownloadURL();
+            // 1. Caricamento su Cloudinary
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', UPLOAD_PRESET);
 
-            // B. Salva i dati nel database (Crea la raccolta "quadri" se non esiste)
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!res.ok) throw new Error("Errore Cloudinary: verifica l'upload preset Unsigned.");
+            
+            const data = await res.json();
+            const photoURL = data.secure_url; // URL della foto caricata
+
+            // 2. Salvataggio dati su Firestore
+            // La raccolta "quadri" verrà creata automaticamente ora
             await db.collection("quadri").add({
                 titolo: titolo,
                 descrizione: desc,
@@ -60,11 +68,11 @@ if (document.getElementById('admin-form')) {
                 data: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            alert("✅ Pubblicato con successo!");
+            alert("✅ Quadro pubblicato con successo!");
             form.reset();
         } catch (error) {
-            console.error("Errore durante il caricamento:", error);
-            alert("Errore durante il caricamento. Controlla la console (F12) per i dettagli CORS.");
+            console.error(error);
+            alert("Errore nel caricamento. Controlla la console.");
         } finally {
             btn.innerText = "Pubblica sul sito";
             btn.disabled = false;
@@ -72,16 +80,16 @@ if (document.getElementById('admin-form')) {
     });
 }
 
-// --- FUNZIONI PER LA PAGINA QUADRI (VISUALIZZAZIONE) ---
+// --- VISUALIZZAZIONE GALLERIA ---
 if (document.getElementById('galleria-quadri')) {
     const container = document.getElementById('galleria-quadri');
-
-    // Recupera i dati in tempo reale dal database
+    
+    // Recupero dati in tempo reale
     db.collection("quadri").orderBy("data", "desc").onSnapshot((snapshot) => {
-        container.innerHTML = ""; // Pulisce il contenitore
+        container.innerHTML = ""; 
         snapshot.forEach((doc) => {
             const q = doc.data();
-            const card = `
+            container.innerHTML += `
                 <div class="quadro-card">
                     <img src="${q.url}" alt="${q.titolo}">
                     <div class="quadro-info">
@@ -89,9 +97,7 @@ if (document.getElementById('galleria-quadri')) {
                         <p>${q.descrizione}</p>
                         <span class="prezzo">${q.prezzo}</span>
                     </div>
-                </div>
-            `;
-            container.innerHTML += card;
+                </div>`;
         });
     });
 }
