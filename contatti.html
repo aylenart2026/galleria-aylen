@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contatti - Aylen Art</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="quadri.html">Quadri</a>
+        <a href="eventi.html">Eventi</a>
+        <a href="contatti.html" class="active">Contatti</a>
+        <a href="admin.html">Admin</a>
+    </nav>
+
+    <main class="container">
+        <div class="admin-card">
+            <h2>Contattami</h2>
+            <p>Compila il form sottostante per inviarmi una mail direttamente.</p>
+            
+            <form action="https://formspree.io/f/xnjnrzae" method="POST">
+                <input type="text" name="nome" placeholder="Nome" required>
+                <input type="text" name="cognome" placeholder="Cognome" required>
+                <input type="email" name="email" placeholder="La tua Email" required>
+                <textarea name="message" placeholder="Il tuo messaggio" required style="height: 150px;"></textarea>
+                <button type="submit" class="btn">Invia Messaggio</button>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

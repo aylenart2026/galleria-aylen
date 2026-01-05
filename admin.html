@@ -12,7 +12,10 @@
     <header>
         <h1>Area Riservata - Gestione Sito</h1>
         <nav>
-            <a href="index.html">Torna al Sito</a>
+            <a href="index.html">Home</a>
+            <a href="quadri.html">Quadri</a>
+            <a href="eventi.html">Eventi</a>
+            <a href="contatti.html">Contatti</a>
         </nav>
     </header>
 
@@ -20,11 +23,10 @@
         <div id="login-box" class="admin-card">
             <h2>Accesso Protetto</h2>
             <input type="password" id="admin-password" placeholder="Password">
-            <button id="login-btn">Accedi</button>
+            <button id="login-btn" class="btn">Accedi</button>
         </div>
 
         <div id="admin-content" style="display: none;">
-            
             <div class="admin-card">
                 <h2>Pubblica un nuovo Quadro</h2>
                 <form id="admin-form">
@@ -32,7 +34,7 @@
                     <textarea id="q-desc" placeholder="Descrizione" required></textarea>
                     <input type="text" id="q-prezzo" placeholder="Prezzo" required>
                     <input type="file" id="q-foto" accept="image/*" required>
-                    <button type="submit" id="submit-btn">Pubblica sul sito</button>
+                    <button type="submit" id="submit-btn" class="btn">Pubblica sul sito</button>
                 </form>
             </div>
 
@@ -42,7 +44,6 @@
                     <p>Caricamento lista...</p>
                 </div>
             </div>
-
         </div>
     </main>
 
