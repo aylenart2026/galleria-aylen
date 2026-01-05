@@ -1,3 +1,4 @@
+// --- CONFIGURAZIONE FIREBASE ---
 const firebaseConfig = {
   apiKey: "AIzaSyAzpudn2GxVeWpD_l6MMy4l9iVbzflE4Os",
   authDomain: "sito-aylen.firebaseapp.com",
@@ -9,24 +10,28 @@ const firebaseConfig = {
   measurementId: "G-WEGB2PCMYF"
 };
 
+// Inizializzazione Firebase
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.database();
 
-// --- LOGIN ---
+// --- GESTIONE LOGIN (ADMIN) ---
 const loginBtn = document.getElementById('login-btn');
 if (loginBtn) {
     loginBtn.addEventListener('click', () => {
+        // Controllo password per l'accesso all'area riservata
         if (document.getElementById('admin-password').value === "mamma2025") {
             document.getElementById('login-box').style.display = 'none';
             document.getElementById('admin-content').style.display = 'block';
             caricaListaAdmin(); 
-        } else { alert("Password errata!"); }
+        } else { 
+            alert("Password errata!"); 
+        }
     });
 }
 
-// --- CARICAMENTO ---
+// --- CARICAMENTO NUOVI QUADRI (ADMIN) ---
 const adminForm = document.getElementById('admin-form');
 if (adminForm) {
     adminForm.addEventListener('submit', async (e) => {
@@ -41,11 +46,14 @@ if (adminForm) {
             formData.append('file', file);
             formData.append('upload_preset', "quadri_preset");
 
+            // Upload immagine su Cloudinary
             const res = await fetch(`https://api.cloudinary.com/v1_1/dryiwjoqm/image/upload`, {
-                method: 'POST', body: formData
+                method: 'POST', 
+                body: formData
             });
             const data = await res.json();
 
+            // Salvataggio dati su Firebase Realtime Database
             await db.ref('quadri').push({
                 titolo: document.getElementById('q-titolo').value,
                 descrizione: document.getElementById('q-desc').value,
@@ -66,7 +74,7 @@ if (adminForm) {
     });
 }
 
-// --- LISTA ADMIN PER ELIMINAZIONE ---
+// --- LISTA GESTIONE QUADRI (ADMIN) ---
 function caricaListaAdmin() {
     const listContainer = document.getElementById('admin-list-quadri');
     if (!listContainer) return;
@@ -90,6 +98,7 @@ function caricaListaAdmin() {
     });
 }
 
+// Funzione globale per eliminare un'opera
 window.eliminaQuadro = function(id) {
     if (confirm("Sei sicuro di voler eliminare questo quadro?")) {
         db.ref('quadri/' + id).remove()
@@ -98,13 +107,14 @@ window.eliminaQuadro = function(id) {
     }
 }
 
-// --- GALLERIA PUBBLICA ---
+// --- GALLERIA PUBBLICA (QUADRI.HTML) ---
 const galleria = document.getElementById('galleria-quadri');
 if (galleria) {
     db.ref('quadri').on('value', (snapshot) => {
         const data = snapshot.val();
         galleria.innerHTML = ""; 
         if (data) {
+            // Mostra i quadri in ordine dal più recente
             Object.values(data).reverse().forEach(q => {
                 galleria.innerHTML += `
                     <div class="card">
@@ -123,3 +133,24 @@ if (galleria) {
         }
     });
 }
+
+// --- FUNZIONE DI RICERCA IN TEMPO REALE ---
+// Collegata all'evento onkeyup dell'input in quadri.html
+window.filtraQuadri = function() {
+    const input = document.getElementById('cercaQuadro').value.toLowerCase();
+    const cards = document.querySelectorAll('.card');
+
+    cards.forEach(card => {
+        // Cerca il titolo dentro il tag h3 di ogni card
+        const titoloElement = card.querySelector('h3');
+        if (titoloElement) {
+            const titolo = titoloElement.innerText.toLowerCase();
+            // Nasconde o mostra la card in base alla corrispondenza
+            if (titolo.includes(input)) {
+                card.style.display = ""; 
+            } else {
+                card.style.display = "none";
+            }
+        }
+    });
+};
