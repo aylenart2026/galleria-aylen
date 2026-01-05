@@ -10,13 +10,20 @@
 </head>
 <body>
     <nav>
-        <a href="index.html">Home</a>
-        <a href="quadri.html" class="active">Quadri</a>
-        <a href="admin.html">Admin</a>
-    </nav>
+    <a href="index.html">Home</a>
+    <a href="quadri.html" class="active">Quadri</a>
+    <a href="eventi.html">Eventi</a>
+     <a href="contatti.html">Contatti</a> 
+     <a href="admin.html">Admin</a>
+</nav>
 
     <main class="container">
         <h1 style="text-align: center;">Le mie Opere</h1>
+        
+        <div style="max-width: 500px; margin: 0 auto 30px auto;">
+            <input type="text" id="cercaQuadro" onkeyup="filtraQuadri()" placeholder="🔍 Cerca un quadro per titolo...">
+        </div>
+
         <div id="galleria-quadri" class="gallery-grid">
             <p>Caricamento opere in corso...</p>
         </div>
